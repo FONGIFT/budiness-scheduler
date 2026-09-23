@@ -97,6 +97,27 @@ In the PowerShell window where `npm run dev` is running, press
 batch job, type `Y` and press <kbd>Enter</kbd>. The local server will stop and
 the port will be released.
 
+## Database (Supabase PostgreSQL)
+
+BookFlow uses **Supabase PostgreSQL** when it is configured. PostgreSQL is a good
+fit for appointments because it supports durable, relational customer/service/
+appointment data, indexed schedule queries, and row-level security. The app
+continues in demo mode with mock data when no Supabase variables are supplied.
+
+1. Create a Supabase project and open its **SQL Editor**.
+2. Run [`supabase/schema.sql`](supabase/schema.sql) to create the tables, indexes,
+   validation constraints, and authenticated-user row-level-security policies.
+3. Copy `.env.example` to `.env`, then set `VITE_SUPABASE_URL` and
+   `VITE_SUPABASE_ANON_KEY` from the project's API settings.
+4. Configure Supabase Authentication before using production data. The schema
+   intentionally permits only authenticated requests; the browser must never
+   receive a Supabase service-role key.
+
+The app reads all configured collections at startup and upserts appointment,
+customer, service, working-hours, and settings updates. Deleting a service is
+currently a soft client-side deletion only; add a dedicated delete endpoint or
+mark services inactive rather than relying on removal in production.
+
 ## Optional environment variables
 
 The current interface runs with its included mock data and does not require an
