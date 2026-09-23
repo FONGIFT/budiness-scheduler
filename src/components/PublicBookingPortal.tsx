@@ -245,7 +245,7 @@ export const PublicBookingPortal: React.FC<PublicBookingPortalProps> = ({
                           <span className="material-symbols-outlined text-[15px]">schedule</span>
                           {srv.durationMinutes} mins
                         </span>
-                        <span className="font-bold text-primary font-label-lg text-label-lg">
+                        <span className="font-bold text-money font-label-lg text-label-lg">
                           {srv.priceFcfa.toLocaleString()} FCFA
                         </span>
                       </div>
@@ -525,15 +525,17 @@ export const PublicBookingPortal: React.FC<PublicBookingPortalProps> = ({
               <div className="pt-4 border-t border-border-subtle flex flex-col gap-2">
                 <div className="flex justify-between text-body-sm text-on-surface-variant">
                   <span>Subtotal</span>
-                  <span>{selectedService.priceFcfa.toLocaleString()} FCFA</span>
+                  <span className="font-medium text-money">
+                    {selectedService.priceFcfa.toLocaleString()} FCFA
+                  </span>
                 </div>
                 <div className="flex justify-between text-caption text-caption text-status-confirmed">
                   <span>Online Deposit</span>
-                  <span>0 FCFA (Pay at Studio)</span>
+                  <span className="font-medium text-money">0 FCFA (Pay at Studio)</span>
                 </div>
                 <div className="flex justify-between font-headline-md text-headline-md font-bold text-on-surface pt-2 border-t border-border-subtle">
                   <span>Total Amount</span>
-                  <span className="text-primary">
+                  <span className="text-money">
                     {selectedService.priceFcfa.toLocaleString()} FCFA
                   </span>
                 </div>
@@ -602,7 +604,7 @@ export const PublicBookingPortal: React.FC<PublicBookingPortalProps> = ({
               </p>
               <p className="flex justify-between">
                 <span className="text-on-surface-variant">Amount:</span>
-                <strong className="font-bold text-on-surface">
+                <strong className="font-bold text-money">
                   {confirmedBooking.price} (Pay on Arrival)
                 </strong>
               </p>
