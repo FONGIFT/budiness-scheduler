@@ -88,8 +88,14 @@ npm run dev
 ```
 
 Vite will show the local URL in PowerShell. Open the displayed address—normally
-[`http://localhost:3000`](http://localhost:3000)—in a browser. Stop the server
-with <kbd>Ctrl</kbd> + <kbd>C</kbd>.
+[`http://localhost:3000`](http://localhost:3000)—in a browser.
+
+### Stop the development server
+
+In the PowerShell window where `npm run dev` is running, press
+<kbd>Ctrl</kbd> + <kbd>C</kbd>. If PowerShell asks whether to terminate the
+batch job, type `Y` and press <kbd>Enter</kbd>. The local server will stop and
+the port will be released.
 
 ## Optional environment variables
 
