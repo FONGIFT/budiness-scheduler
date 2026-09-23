@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Appointment,
   Customer,
@@ -25,6 +25,7 @@ import { SettingsView } from './components/SettingsView';
 import { AppointmentDrawer } from './components/AppointmentDrawer';
 import { NewAppointmentModal } from './components/NewAppointmentModal';
 import { QrCodeModal } from './components/QrCodeModal';
+import { loadDatabaseState, saveAppointment, saveCustomer, saveServices, saveSettings, saveWorkingDays } from './lib/supabase';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<NavigationTab>('dashboard');
@@ -46,6 +47,21 @@ export default function App() {
   // Toast Notification System
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  useEffect(() => {
+    let active = true;
+    void loadDatabaseState()
+      .then((data) => {
+        if (!active || !data) return;
+        if (data.appointments) setAppointments(data.appointments);
+        if (data.customers) setCustomers(data.customers);
+        if (data.services) setServices(data.services);
+        if (data.workingDays) setWorkingDays(data.workingDays);
+        if (data.settings) setSettings(data.settings);
+      })
+      .catch(() => showToast('Could not load the database; using demo data.'));
+    return () => { active = false; };
+  }, []);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {
@@ -55,7 +71,12 @@ export default function App() {
 
   const handleUpdateAppointmentStatus = (id: string, newStatus: Appointment['status']) => {
     setAppointments((prev) =>
-      prev.map((apt) => (apt.id === id ? { ...apt, status: newStatus } : apt))
+      prev.map((apt) => {
+        if (apt.id !== id) return apt;
+        const updated = { ...apt, status: newStatus };
+        void saveAppointment(updated).catch(() => showToast('Appointment status was not saved to the database.'));
+        return updated;
+      })
     );
     if (selectedAppointment && selectedAppointment.id === id) {
       setSelectedAppointment((prev) => (prev ? { ...prev, status: newStatus } : null));
@@ -64,6 +85,7 @@ export default function App() {
 
   const handleAddAppointment = (newApt: Appointment) => {
     setAppointments((prev) => [newApt, ...prev]);
+    void saveAppointment(newApt).catch(() => showToast('Appointment was not saved to the database.'));
 
     // Also add to client directory if not exists
     if (!customers.some((c) => c.name.toLowerCase() === newApt.clientName.toLowerCase())) {
@@ -80,7 +102,23 @@ export default function App() {
         tag: 'New',
       };
       setCustomers((prev) => [newCust, ...prev]);
+      void saveCustomer(newCust).catch(() => showToast('Customer was not saved to the database.'));
     }
+  };
+
+  const handleUpdateServices = (updatedServices: ServiceItem[]) => {
+    setServices(updatedServices);
+    void saveServices(updatedServices).catch(() => showToast('Services were not saved to the database.'));
+  };
+
+  const handleUpdateWorkingDays = (updatedWorkingDays: WorkingDay[]) => {
+    setWorkingDays(updatedWorkingDays);
+    void saveWorkingDays(updatedWorkingDays).catch(() => showToast('Working hours were not saved to the database.'));
+  };
+
+  const handleUpdateSettings = (updatedSettings: StudioSettings) => {
+    setSettings(updatedSettings);
+    void saveSettings(updatedSettings).catch(() => showToast('Settings were not saved to the database.'));
   };
 
   // Filtered appointments for today based on search
@@ -170,9 +208,9 @@ export default function App() {
             services={services}
             workingDays={workingDays}
             settings={settings}
-            onUpdateServices={setServices}
-            onUpdateWorkingDays={setWorkingDays}
-            onUpdateSettings={setSettings}
+            onUpdateServices={handleUpdateServices}
+            onUpdateWorkingDays={handleUpdateWorkingDays}
+            onUpdateSettings={handleUpdateSettings}
             onNavigate={setCurrentTab}
             onShowToast={showToast}
             initialTab={currentTab === 'availability-&-hours' ? 'hours' : 'services'}
@@ -190,7 +228,7 @@ export default function App() {
         {currentTab === 'settings' && (
           <SettingsView
             settings={settings}
-            onUpdateSettings={setSettings}
+            onUpdateSettings={handleUpdateSettings}
             onShowToast={showToast}
           />
         )}
